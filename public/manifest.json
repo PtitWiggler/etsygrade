@@ -1,0 +1,9 @@
+{
+  "manifest_version": 3,
+  "name": "EtsyGrade",
+  "version": "0.1.0",
+  "description": "Extension permettant d'obtenir la notation d'une fiche Etsy et des conseils d'amélioration",
+  "action": {
+    "default_popup": "index.html"
+  }
+}
