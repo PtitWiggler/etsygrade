@@ -1,4 +1,4 @@
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === "GET_LISTING_TITLE") {
 
     const h1 = document.querySelector("h1");

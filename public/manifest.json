@@ -11,7 +11,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://www.etsy.com/listing/*"],
+      "matches": ["*://www.etsy.com/listing/*", "*://www.etsy.com/*/listing/*"],
       "js": ["content/scraper.js"]
     }
   ],
