@@ -1,13 +1,16 @@
+import retrieveTitle from "./extractors/title";
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message.type === "GET_LISTING_TITLE") {
+  if (message.type === "SCRAPE_LISTING") {
 
-    const h1 = document.querySelector("h1");
+    // TODO : refacto avec listingData.ts pour récupérer toutes les données d'un listing en une seule fois
 
-    if (h1) {
-      const titre = h1.textContent ?? "";
+    const titre = retrieveTitle(document);
+    
+    if (titre) {
       sendResponse({ data: titre });
     } else {
-      sendResponse({ data: "Pas de titre" });
+      sendResponse({ data: null });
     }
   }
 

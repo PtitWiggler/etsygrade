@@ -1,5 +1,5 @@
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-if (message.type === "GET_LISTING_TITLE") {
+if (message.type === "SCRAPE_LISTING") {
 
     chrome.tabs.query({ active: true, currentWindow: true }).then(tabs => {
         if (tabs[0]?.id) {

@@ -10,7 +10,7 @@ function App() {
       const isListingPage = /etsy\.com\/(\w{2}\/)?listing\//.test(url);
 
       if (isListingPage) {
-        chrome.runtime.sendMessage({ type: "GET_LISTING_TITLE" })
+        chrome.runtime.sendMessage({ type: "SCRAPE_LISTING" })
         .then(response => {
           if (response && response.data) {
             setTitle(response.data);
