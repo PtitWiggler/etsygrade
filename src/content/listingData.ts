@@ -1,6 +1,5 @@
-interface listingData {
+interface ListingData {
   title: string | null;
-  tags: string[];           // vide si aucun tag trouvé
   photoCount: number;
   hasVideo: boolean;
   description: string | null;
@@ -8,3 +7,5 @@ interface listingData {
   hasShippingInfo: boolean;
   shopSection: string | null;
 }
+
+export type { ListingData as default };
