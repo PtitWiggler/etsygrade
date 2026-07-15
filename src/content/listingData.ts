@@ -5,7 +5,6 @@ interface ListingData {
   description: string | null;
   price: string | null;     // string brute, pas de parsing € / $ ici
   hasShippingInfo: boolean;
-  shopSection: string | null;
 }
 
 export type { ListingData as default };

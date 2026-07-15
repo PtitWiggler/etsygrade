@@ -15,7 +15,6 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       description: null, // TODO : implement description extraction
       price: completeness?.price,
       hasShippingInfo: completeness?.hasShippingInfo,
-      shopSection: completeness?.shopSection,
     }
 
     sendResponse({ data: result });

@@ -1,26 +1,46 @@
 interface CompletenessData {
   price: string | null;
   hasShippingInfo: boolean;
-  shopSection: string | null;
 }
+
+interface SimpleOffer {
+  "@type": "Offer";
+  price: string;
+}
+
+interface AggregateOffer {
+  "@type": "AggregateOffer";
+  lowPrice: string;
+  highPrice: string;
+}
+
+type ProductOffer = SimpleOffer | AggregateOffer;
 
 interface ProductJsonLd {
   "@type"?: string;
-  offers?: {
-    price?: string;
-  };
+  offers?: ProductOffer;
 }
 
 function retrieveCompleteness(doc: Document): CompletenessData {
-    const price = getProductJsonLd(doc)?.offers?.price ?? null;
-    const hasShippingInfo = !!doc.querySelector(".shipping-info");
-    const shopSection = doc.querySelector(".shop-section")?.textContent?.trim() ?? null;
+    const price = retrievePrice(getProductJsonLd(doc)?.offers);
+    const hasShippingInfo = !!doc.querySelector('[data-selector="shipping-highlights"]');
 
     return {
         price,
         hasShippingInfo,
-        shopSection
     };
+}
+
+function retrievePrice(offers: ProductOffer | undefined): string | null {
+  if (offers === undefined) {
+    return null;
+  }
+
+  if (offers["@type"] === "Offer") {
+    return offers.price;
+  } else {
+    return `${offers.lowPrice} - ${offers.highPrice}`;
+  }
 }
 
 function isProductJsonLd(value: unknown): value is ProductJsonLd {
