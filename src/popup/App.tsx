@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import type ListingData from "../content/listingData";
 
 function App() {
-  const [title, setTitle] = useState<string | null>(null);
+  const [listingData, setListingData] = useState<ListingData | null>(null);
 
   useEffect(() => {
 
@@ -13,11 +14,11 @@ function App() {
         chrome.runtime.sendMessage({ type: "SCRAPE_LISTING" })
         .then(response => {
           if (response && response.data) {
-            setTitle(response.data);
+            setListingData(response.data);
           }
         })
         .catch(error => {
-          console.error("Erreur lors de la récupération du titre :", error);
+          console.error("Erreur lors de la récupération des données du listing :", error);
         });
       }
     });
@@ -26,9 +27,9 @@ function App() {
   return (
     <>
       <section id="center">
-        {title ? (
+        {listingData ? (
           <div className="title">
-            <h1>{title}</h1>
+            <pre>{JSON.stringify(listingData, null, 2)}</pre>
           </div>
         ) : (
           <div className="title">
