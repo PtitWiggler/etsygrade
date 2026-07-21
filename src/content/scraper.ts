@@ -1,5 +1,6 @@
 import retrieveCompleteness from "./extractors/completeness";
 import retrieveDescription from "./extractors/description";
+import retrievePhotoData from "./extractors/photos";
 import retrieveTitle from "./extractors/title";
 import type ListingData from "./listingData";
 
@@ -9,11 +10,12 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     const title = retrieveTitle(document);
     const completeness = retrieveCompleteness(document);
     const description = retrieveDescription(document);
-
+    const photoData = retrievePhotoData(document);
+    
     const result: ListingData = {
       title: title,
-      photoCount: 0, // TODO : implement photo count extraction
-      hasVideo: false, // TODO : implement video detection
+      photoCount: photoData.photoCount,
+      hasVideo: photoData.hasVideo,
       description: description,
       price: completeness.price,
       hasShippingInfo: completeness.hasShippingInfo,
