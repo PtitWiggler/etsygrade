@@ -1,5 +1,6 @@
 import type ListingData from "../content/listingData";
-import type { RuleResult, ScoreResult } from "./types";
+import { calculatePriceScore, calculateShippingScore } from "./rules/completeness";
+import type { CategoryResult, RuleResult, ScoreResult } from "./types";
 
 interface CategoryConfig {
   name: string;
@@ -10,7 +11,7 @@ interface CategoryConfig {
 const CATEGORIES: CategoryConfig[] = [
   { name: 'Titre', weight: 0.35, rules: [] },
   { name: 'Photos', weight: 0.30, rules: [] },
-  { name: 'Complétude', weight: 0.20, rules: [] },
+  { name: 'Complétude', weight: 0.20, rules: [calculatePriceScore, calculateShippingScore] },
   { name: 'Description', weight: 0.15, rules: [] },
 ];
 
@@ -29,10 +30,41 @@ const GRADES: Grade[] = [
 ];
 
 function calculateScore(data: ListingData): ScoreResult {
+  const categoriesResults: CategoryResult[] = [];
+
+  CATEGORIES.forEach(category => {
+    const ruleResults = category.rules.map(rule => rule(data));
+
+    const totals = ruleResults.reduce(
+      (acc, r) => ({ score: acc.score + r.score, maxScore: acc.maxScore + r.maxScore }),
+      { score: 0, maxScore: 0 }
+    );
+
+    const categoryScore = totals.maxScore === 0
+    ? 0
+    : Math.round((totals.score / totals.maxScore) * 100);
+
+    if (totals.maxScore === 0) {
+      console.warn(`Catégorie "${category.name}" n'a aucune règle avec maxScore > 0`);
+    }
+
+    const categoryResult: CategoryResult = {
+      name: category.name,
+      score: categoryScore,
+      weight: category.weight,
+      rules: ruleResults,
+    }
+    categoriesResults.push(categoryResult);
+  });
+
+  const globalScore = Math.round(categoriesResults.reduce((acc, category) => {
+    return acc + category.score * category.weight;
+  }, 0));
+  
   return {
-    globalScore: 0,
-    grade: 'A',
-    categories: [],
+    globalScore: globalScore,
+    grade: scoreToGrade(globalScore).name,
+    categories: categoriesResults,
   };
 }
 
@@ -42,10 +74,7 @@ function scoreToGrade(score: number): Grade {
     score = Math.max(0, Math.min(100, score));
   }
 
-  // TODO : mettre rounded dans calculateScore pour éviter de recalculer à chaque fois
-  const rounded = Math.round(score);
-
-  return GRADES.find(grade => rounded >= grade.minScore && rounded < grade.maxScore) || GRADES[GRADES.length - 1];
+  return GRADES.find(grade => score >= grade.minScore && score < grade.maxScore) || GRADES[GRADES.length - 1];
 }
 
 export default calculateScore;

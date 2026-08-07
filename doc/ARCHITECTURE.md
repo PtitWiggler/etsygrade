@@ -159,11 +159,14 @@ etsygrade/
 │   ├── scoring/         # Logique métier
 │   │   ├── types.ts
 │   │   ├── rules/
+│   │   │   ├── constants.ts
 │   │   │   ├── title.ts
 │   │   │   ├── photos.ts
 │   │   │   ├── description.ts
+│   │   │   ├── completeness.test.ts
 │   │   │   └── completeness.ts
-│   │   └── scorer.ts
+│   │   ├── scorer.ts
+│   │   └── scorer.test.ts
 │   ├── i18n/            # Traductions
 │   │   ├── en.json
 │   │   └── fr.json
@@ -210,6 +213,12 @@ etsygrade/
 | 2026-07-21 | Source de données privilégiée pour le scraping : JSON-LD (`script[type="application/ld+json"]`) plutôt que le DOM visuel, via un helper générique `findJsonLdByType` avec type guards | Le JSON-LD est un contrat SEO plus stable que les classes/structure CSS d'Etsy (sujettes à changements fréquents, A/B tests). Utilisé pour titre (fallback DOM), prix, description, nombre de photos, présence vidéo. |
 | 2026-07-21 | `retrievePrice` gère `Offer` (prix unique) et `AggregateOffer` (variantes, `lowPrice`/`highPrice`) via discriminated union sur `@type` | Un listing à variantes de prix expose un `AggregateOffer` en JSON-LD tant qu'aucune option n'est sélectionnée ; le format bascule en `Offer` simple une fois une variante choisie. Format de sortie pour `ListingData.price` : range formatée `"lowPrice - highPrice"` quand agrégée. |
 | 2026-07-21 | `hasShippingInfo` extrait du DOM (`[data-selector="shipping-highlights"]`), pas du JSON-LD | Le champ `offers.shippingDetails` du JSON-LD est présent même sur les listings digitaux (sans livraison physique réelle) — signal non discriminant. Le sélecteur DOM, lui, est absent sur les listings digitaux et présent sur les listings physiques, vérifié empiriquement sur les deux cas. |
+| 2026-08-07 | `scorer.ts` : agrégation via `CategoryConfig[]` déclaratif (`{ name, weight, rules }`), itéré par `forEach`/`map` — aucun branchement par nom de catégorie | Ajouter/retirer une règle ou une catégorie devient un changement de données, pas de logique. Le retrait de Tags (2026-07-21) aurait été trivial avec ce pattern. |
+| 2026-08-07 | Barème `POINTS` centralisé dans `scoring/rules/constants.ts` (`critical: 15, warning: 10, tip: 5`), utilisé comme `maxScore` de chaque `RuleResult` selon sa sévérité | Le `maxScore` reflète la gravité réelle du problème (un `tip` cosmétique ne doit pas peser autant qu'un `critical`), plutôt qu'un `maxScore` uniforme par catégorie qui aurait effacé cette hiérarchie. |
+| 2026-08-07 | Normalisation par catégorie : `Σ(score) / Σ(maxScore) × 100`, jamais la moyenne des ratios individuels par règle | Sommer des ratios déjà normalisés à 100 fait dépasser `categoryScore` de 100 dès qu'une catégorie a plus d'une règle. Piège identifié en review du premier jet de `scorer.ts`. |
+| 2026-08-07 | Double arrondi (`Math.round`) : une fois sur `categoryScore` avant pondération, une fois sur `globalScore` final | Garantit que chaque nombre affiché en UI (score par catégorie, score global) est directement traçable et recalculable par l'utilisateur, au prix d'une perte de précision théorique négligeable. |
+| 2026-08-07 | `scoreToGrade` : arrondi de `score` (`Math.round`) avant comparaison aux bornes de `GRADES`, pas sur la valeur brute | Un score affiché "90" ne doit jamais correspondre à une note B à cause d'une valeur brute du type `89.9999...` issue de l'arithmétique flottante. |
+| 2026-08-07 | Garde-fou : si `Σ(maxScore) === 0` pour une catégorie (aucune règle avec un `maxScore` positif), `categoryScore = 0` et `console.warn`, pas d'exception | Empêche la propagation silencieuse de `NaN` dans `globalScore` (division par zéro), sans crasher le popup pour un souci de configuration interne. |
 
 ---
 
