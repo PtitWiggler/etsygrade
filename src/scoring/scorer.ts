@@ -1,5 +1,6 @@
 import type ListingData from "../content/listingData";
 import { calculatePriceScore, calculateShippingScore } from "./rules/completeness";
+import { calculateVideoScore, calculatePhotoCountScore } from "./rules/photos";
 import type { CategoryResult, RuleResult, ScoreResult } from "./types";
 
 interface CategoryConfig {
@@ -10,7 +11,7 @@ interface CategoryConfig {
 
 const CATEGORIES: CategoryConfig[] = [
   { name: 'Titre', weight: 0.35, rules: [] },
-  { name: 'Photos', weight: 0.30, rules: [] },
+  { name: 'Photos', weight: 0.30, rules: [calculatePhotoCountScore, calculateVideoScore] },
   { name: 'Complétude', weight: 0.20, rules: [calculatePriceScore, calculateShippingScore] },
   { name: 'Description', weight: 0.15, rules: [] },
 ];
