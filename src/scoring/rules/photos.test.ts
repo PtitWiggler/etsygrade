@@ -57,18 +57,19 @@ describe('calculatePhotoCountScore', () => {
 });
 
 describe('calculateVideoScore', () => {
+  it("retourne le score max quand une vidéo est présente", () => {
+    const data = mockListingData({ hasVideo: true });
+    const result = calculateVideoScore(data);
+    expect(result.score).toBe(result.maxScore);
+    expect(result.severity).toBe('tip');
+    expect(result.recommendation).toBeNull();
+  });
 
-    it("retourne le score max quand une vidéo est présente", () => {
-        const data = mockListingData({ hasVideo: true });
-        const result = calculateVideoScore(data);
-        expect(result.score).toBe(result.maxScore);
-        expect(result.recommendation).toBeNull();
-    });
-
-    it("retourne 0 quand il n'y a pas de vidéo", () => {
-        const data = mockListingData({ hasVideo: false });
-        const result = calculateVideoScore(data);
-        expect(result.score).toBe(0);
-        expect(result.recommendation).not.toBeNull();
-    });
+  it("retourne 0 quand il n'y a pas de vidéo", () => {
+      const data = mockListingData({ hasVideo: false });
+      const result = calculateVideoScore(data);
+      expect(result.score).toBe(0);
+      expect(result.severity).toBe('tip');
+      expect(result.recommendation).not.toBeNull();
+  });
 });
